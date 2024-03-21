@@ -33,14 +33,17 @@ def register():
 
     cursor = conn.cursor()
     try:
-        cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))
+        cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s) RETURNING id, username", (username, password))
+        user = cursor.fetchone()
         conn.commit()
-        return jsonify({'message': 'User registered successfully'}), 201
+        user_id, username = user
+        return jsonify({'user_id': user_id, 'username': username, 'message': 'User registered successfully'}), 201
     except psycopg2.IntegrityError:
         conn.rollback()
         return jsonify({'error': 'Username already exists'}), 400
     finally:
         cursor.close()
+
 
 @app.route('/login', methods=['POST'])
 def login():
