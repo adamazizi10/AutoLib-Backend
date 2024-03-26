@@ -4,20 +4,41 @@ import pytz
 from flask import Flask, jsonify, request
 import psycopg2
 from flask_cors import CORS
+from dotenv import load_dotenv
+import os
 
 app = Flask(__name__)
 CORS(app)
 
+load_dotenv()
+
+
+# Establish database connection using the environment variable
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if DATABASE_URL is not None:
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+else:
+    print("DATABASE_URL environment variable is not set. Unable to establish database connection.")
+
+
+
 # Establish database connection
-conn = psycopg2.connect(
-    host="127.0.0.1",
-    port="5432",
-    user="adamazizi",
-    password="",  # Add password if required
-    database="librarycoe892"
-)
+# conn = psycopg2.connect(
+#     host="127.0.0.1",
+#     port="5432",
+#     user="adamazizi",
+#     password="",  # Add password if required
+#     database="librarycoe892"
+# )
 
 # Define routes and handlers
+
+@app.route('/')
+def home():
+    return "Welcome to the Library API!"
+
+
 @app.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -150,4 +171,6 @@ def return_book(book_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=3001)
+    # Use the dynamic port provided by Heroku through the PORT environment variable
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=True, port=port)
