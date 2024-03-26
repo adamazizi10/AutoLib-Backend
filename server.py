@@ -173,4 +173,4 @@ def return_book(book_id):
 if __name__ == '__main__':
     # Use the dynamic port provided by Heroku through the PORT environment variable
     port = int(os.environ.get("PORT", 5000))
-    app.run(debug=True, port=port)
+    app.run(debug=False, port=port)
