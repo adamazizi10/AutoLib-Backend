@@ -36,7 +36,7 @@ else:
 
 @app.route('/')
 def home():
-    return "Welcome to the Library API!"
+    return "Welcome to the AutoLib"
 
 
 @app.route('/register', methods=['POST'])
