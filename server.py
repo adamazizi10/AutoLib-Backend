@@ -16,6 +16,7 @@ load_dotenv()
 # Establish database connection using the environment variable
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+
 if DATABASE_URL is not None:
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 else:
@@ -54,7 +55,7 @@ def register():
 
     cursor = conn.cursor()
     try:
-        cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s) RETURNING id, username", (username, password))
+        cursor.execute("INSERT INTO library_users (username, password) VALUES (%s, %s) RETURNING id, username", (username, password))
         user = cursor.fetchone()
         conn.commit()
         user_id, username = user
@@ -77,7 +78,7 @@ def login():
 
     cursor = conn.cursor()
     try:
-        cursor.execute("SELECT id, username FROM users WHERE username = %s AND password = %s", (username, password))
+        cursor.execute("SELECT id, username FROM library_users WHERE username = %s AND password = %s", (username, password))
         user = cursor.fetchone()
         if user:
             user_id, username = user
@@ -117,7 +118,7 @@ def borrow_book(book_id):
     cursor = conn.cursor()
     try:
         # Get the username of the user borrowing the book
-        cursor.execute("SELECT username FROM users WHERE id = %s", (user_id,))
+        cursor.execute("SELECT username FROM library_users WHERE id = %s", (user_id,))
         borrower_username = cursor.fetchone()[0]  # Assuming username is the first column
 
         # Calculate expiration date (1 month from now) in Eastern Standard Time (EST)
