@@ -1,1 +1,1 @@
-web: gunicorn AutoLib-Backend:app
+web: gunicorn server:app
