@@ -117,11 +117,17 @@ def borrow_book(book_id):
 
     cursor = conn.cursor()
     try:
+        # Check if the user has borrowed three books already
+        cursor.execute("SELECT COUNT(*) FROM books WHERE borrowed_by = %s", (user_id,))
+        num_borrowed = cursor.fetchone()[0]
+
+        if num_borrowed >= 3:
+            return jsonify({'error': 'User has already borrowed three books', 'book_id': book_id}), 400
+
         # Get the username of the user borrowing the book
         cursor.execute("SELECT username FROM library_users WHERE id = %s", (user_id,))
         borrower_username = cursor.fetchone()[0]  # Assuming username is the first column
 
-        # Calculate expiration date (1 month from now) in Eastern Standard Time (EST)
         eastern = pytz.timezone('America/Toronto')
         expires = datetime.now() + timedelta(days=30)
         expires = expires.astimezone(eastern)
@@ -134,6 +140,29 @@ def borrow_book(book_id):
             return jsonify({'error': 'Book is already borrowed or does not exist'}), 404
     finally:
         cursor.close()
+
+    # data = request.get_json()
+    # user_id = data.get('userId')
+
+    # cursor = conn.cursor()
+    # try:
+    #     # Get the username of the user borrowing the book
+    #     cursor.execute("SELECT username FROM library_users WHERE id = %s", (user_id,))
+    #     borrower_username = cursor.fetchone()[0]  # Assuming username is the first column
+    #     # before allowing borrow, it should check if books table, in column borrowed_by the id of the user appears more than 3 times. if yes it should return "user borrowed three books". else it should continue as normal
+
+    #     eastern = pytz.timezone('America/Toronto')
+    #     expires = datetime.now() + timedelta(days=30)
+    #     expires = expires.astimezone(eastern)
+
+    #     cursor.execute("UPDATE books SET borrowed_by = %s, borrowed_by_username = %s, expires = %s WHERE id = %s AND borrowed_by IS NULL", (user_id, borrower_username, expires, book_id))
+    #     if cursor.rowcount == 1:
+    #         conn.commit()
+    #         return jsonify({'message': 'Book borrowed successfully', 'expires': expires, 'borrowed_by': user_id, 'borrowed_by_username': borrower_username}), 200
+    #     else:
+    #         return jsonify({'error': 'Book is already borrowed or does not exist'}), 404
+    # finally:
+    #     cursor.close()
 
 @app.route('/renew/<int:book_id>', methods=['PUT'])
 def renew_book(book_id):
